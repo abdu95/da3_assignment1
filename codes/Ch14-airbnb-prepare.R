@@ -1,19 +1,5 @@
 #########################################################################################
-# Prepared for Gabor's Data Analysis
-#
-# Data Analysis for Business, Economics, and Policy
-# by Gabor Bekes and  Gabor Kezdi
-# Cambridge University Press 2021
-#
-# gabors-data-analysis.com 
-#
-# License: Free to share, modify and use for educational purposes. 
-# 	Not to be used for commercial purposes.
-
-# Chapter 14
-# CH14B Predicting AirBnB apartment prices: selecting a regression model
-# using the airbnb dataset
-# version 0.91 2021-01-04
+#  Data Analysis
 #########################################################################################
 
 

@@ -1,3 +1,4 @@
+# Data cleaning
 # prepare environment 
 
 rm(list=ls())
@@ -74,64 +75,22 @@ for (element in 1:length(df$amenities)){
   df$amenities[[element]] <- trimws(df$amenities[[element]])
 }
 
-for (element in 1:length(df$amenities)){
-  result <- str_detect(tolower(df$amenities[[element]]), 'stove') 
-  something2$stove[[element]] <- ifelse(any(result, na.rm = FALSE), 1, 0)
+pre_amenities <- c("conditioner", "stove", "hdtv", "tv", "conditioning", 
+                   "sound system", "refrigerator", "shampoo", "soap", 
+                   "oven", "toiletries", "speaker", "fan", "heating", 
+                   "breakfast", "table", "dishwasher", "dryer", "elevator", 
+                   "fitness", "parking", "garage", "wifi", "game", "garden", 
+                   "gym", "restaurant", "bar", "washer", "barbeque", "bbq")
+
+
+for (i in pre_amenities){
+  df <- 
+    df %>% 
+    mutate(!! i := ifelse(str_detect(amenities, !! i), 1, 0))
 }
-
-something2$stove <- NA
-result <- str_detect(tolower(something2$amenities[[1]]), 'stove') 
-result
-
-ifelse(any(result, na.rm = FALSE), 1, 0)
-
-'Hot water' %in% something2$amenities[[1]]
-
-if(any(result, na.rm = FALSE)){
-  print("hey")
-}
-
-
-# something2$soap <- ifelse('soap' %in% something2$amenities, 1, 0)
-something2$stove <- ifelse('Stove' %in% something2$amenities, 1, 0)
-something2$amenities
-
-x = strsplit(something2$amenities, ",")
-
-levs
-print()
-for (element in 1:length(something2$amenities)){
-  print(something2$amenities[element])
-}
-
-for (element in 1:3){
-  print(something2$amenities[[1]])
-}
-typeof(something2$amenities)
-
-
-
-
-
-
-
-#########
 
 drops <- c("amenities")
-df<-df[ , !(names(df) %in% drops)]
-
+df <- df[ , !(names(df) %in% drops)]
 
 #write csv
 write.csv(df,file=paste0(data_out,"airbnb_ny_cleaned.csv"))
-
-
-
-to_filter <- sapply(data, function(x) sum(is.na(x)))
-to_filter[to_filter > 0]
-##  bathrooms - 36923, bedrooms - 3588
-# beds - 477
-
-#  data$license
-
-# unique(data[c("license")])
-
