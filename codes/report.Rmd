@@ -6,28 +6,146 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# rm(list=ls())
+
+library(tidyverse)
+library(stargazer)
+library(Hmisc)
+library(kableExtra)
+library(huxtable)
 ```
 
-```{r }
+```{r, echo=FALSE}
 # install.packages("xfun")
 
 ```
-## R Markdown
+## Introduction 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is a report for Data Analysis 3: Assignment 1. The task is to perform prediction using the knowledge we obtained in the course.
 
-Data is for New York, it was comiled on 10 December, 2020. 
 
-```{r cars}
-summary(cars)
+As a first step, we define a business question: to help a company operating small and mid-size apartments hosting 2-6 guests. The company is set to price their new apartments not on the market. 
+For this, I built a price prediction model similarly to how we did in our case study for London (Hackney borough). Also, discussion of my modeling decisions and comparison of my results is provided at the end. 
+In the next step, I define the data for analysis (sample design). For this, I obtained data from [insideairbnb.com](http://insideairbnb.com/get-the-data.html) website. Data is for New York, it was compiled on 10 December, 2020. 
+
+## Label Engineering 
+We have a quantitative y - price in USD dollars. That's why I leave y as it is (without any transformation). 
+
+## Feature engineering
+
+### Data cleaning
+
+The original dataset that was obtained from the website contained 36923 rows and 62 columns. I decided to remove several columns that are not used in the analysis (see Appendix). 
+
+Then dollar signs ("$") were removed from price column. Also, false (f) and true (t) values were replaced with 1 and 0. 
+
+Amenities column consisted of several values. These values in the row were pivoted as a column of dummy variable. List of amenities is given in Appendix. 
+
+Code for data cleaning is provided in **data-cleaning-NY.R** file.
+
+### Data preparation
+
+When dataset was inspected, it was clear that "Entire apartment", "Private room in apartment", and "Entire condominium" were the most frequent property type (Appendix). Therefore, I decided to filter out the dataset and leave only observations that have these property types. 
+
+Dummy variables were created from amenities column (that starts with 'd'). I kept dummy variables, numerical and factorial (categorical) columns and removed all other columns that are not used for the analysis. After that, I left with 49 columns (variables). 
+
+The observations where the value for price column is missing were dropped as our analysis will be prediction of price.
+
+I decided to narrow down my focus and filtered dataset so that it includes  observations only from Manhattan neighborhood. After that, 28402 observations decreased to 14170. 
+
+```{r,echo=F, message=FALSE, warning=FALSE, include=FALSE}
+
+setwd("D:/CEU/winter semester/data-analysis-3/da3_assignment1/")
+
+source("codes/theme_bg.R")
+source("codes/da_helper_functions.R")
+
+data_in <- "data/clean/"
+data_out <- "data/out/"
+
+options(digits = 3)
+
+data <- read_csv(paste(data_in,"airbnb_ny_cleaned.csv", sep = ""))
+
+tbl <- table(data$property_type)
+x <- sort(tbl,decreasing=T)
+
 ```
 
-## Including Plots
+### Exploratory data analysis
 
-You can also embed plots, for example:
+We can see that minimum price is 10 dollars and maximum price is 999 dollars. Average price is 152.1 dollars. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r,echo=F, message=FALSE, warning=FALSE}
+
+file_folder <- "D:/CEU/winter semester/data-analysis-3/da3_assignment1/data/out"
+data <- read_csv(paste(file_folder, "/airbnb_manhattan_workfile.csv", sep = ""))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r,echo=F, message=FALSE, warning=FALSE}
+# describe(data$price)
+#kable(summary(data$price))
+
+sum_price_hux <- as_hux(summary(data$price))
+sum_price_hux %>% 
+  restack_across(rows = 2) %>% 
+  set_caption("Summary of prices")
+
+```
+
+The distribution price shown below. The price is normally distributed, most of the observations having a price between 10 and 250. The plot is skewed to the right indicating some of the extreme values on the right tail (expensive apartments).
+
+```{r,echo=F, message=FALSE, warning=FALSE}
+
+R_F14_h_price <- ggplot(data, aes(price)) +
+  geom_histogram(binwidth = 25, fill = color[1], color = color.outline, alpha = 0.8, size = 0.25) +
+  ylab("count") +
+  xlab("Price") +
+  theme_bg()
+R_F14_h_price
+
+```
+
+Currently, there are 8675 observations that are Entire apartments, 561 Entire condominiums and 4934 observations that are "Private room in apartment". 
+
+Code for data preparation is provided in **data-prepare-NY.R** file.
+
+
+### Functional Form
+
+To decide what functional form to use for the models, I checked interactions between variables. 
+
+
+As we are interested in the price of apartments that can accomodate 2-6 people, 
+
+
+## Appendix
+
+### Data Cleaning
+Removed columns: 
+  
+  
+  "host_thumbnail_url","host_picture_url","listing_url","thumbnail_url","medium_url","picture_url","xl_picture_url","host_url","last_scraped","description", "experiences_offered", "neighborhood_overview", "notes", "transit", "access", "interaction", "house_rules", "host_about", "host_response_time", "name", "summary", "space", "host_location"
+
+
+Amenities:
+  
+  "conditioner", "stove", "hdtv", "tv", "conditioning", 
+"sound system", "refrigerator", "shampoo", "soap", 
+"oven", "toiletries", "speaker", "fan", "heating", 
+"breakfast", "table", "dishwasher", "dryer", "elevator", 
+"fitness", "parking", "garage", "wifi", "game", "garden", 
+"gym", "restaurant", "bar", "washer", "barbeque", "bbq"
+
+
+Property types:
+
+```{r,echo=F, message=FALSE, warning=FALSE,cache=TRUE}
+
+properties_hux <- head(as_hux(x), 6)
+properties_hux %>% set_caption("Property types")
+
+```
+
+

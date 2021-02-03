@@ -8,8 +8,9 @@ rm(list=ls())
 library(tidyverse)
 library(stargazer)
 library(Hmisc)
+library(kableExtra)
+library(huxtable)
 
-getwd()
 setwd("D:/CEU/winter semester/data-analysis-3/da3_assignment1/")
 
 # set data dir, load theme and functions
@@ -27,7 +28,17 @@ options(digits = 3)
 # Import data
 data <- read_csv(paste(data_in,"airbnb_ny_cleaned.csv", sep = ""))
 
-table(data$property_type)
+tbl <- table(data$property_type)
+x <- sort(tbl,decreasing=T)
+
+some_table <- hux(x)
+
+quick_latex(some_table)
+
+first_five <- head(some_table,5)
+
+properties_hux <- as_hux(x)
+properties_hux %>% set_caption("Property types")
 
 # data[data$property_type >1000,]
 
