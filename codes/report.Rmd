@@ -4,6 +4,7 @@ subtitle: 'Airbnb prediction models: New York'
 output:
   html_document:
     df_print: paged
+    code_download: yes
   pdf_document: default
 ---
 
@@ -589,6 +590,9 @@ F14_CI_n_accomodate
 
 
 ## Appendix
+
+Code repo: https://github.com/abdu95/da3_assignment1
+
 
 ### Data Cleaning
 
